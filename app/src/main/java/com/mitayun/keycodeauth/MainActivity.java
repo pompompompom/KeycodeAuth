@@ -6,6 +6,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +14,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -87,9 +89,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void writeToFile(String fileName, List<String> listToWrite) {
+        File sdCard = Environment.getExternalStorageDirectory();
+        File file = new File(sdCard.getAbsolutePath(), fileName);
         FileOutputStream fileOutputStream;
         try {
-            fileOutputStream = openFileOutput(fileName, Context.MODE_PRIVATE);
+            fileOutputStream = new FileOutputStream(file);
             for (String s : listToWrite) {
                 fileOutputStream.write(s.getBytes());
             }
@@ -107,8 +111,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         v.getLocationOnScreen(location);
         float screenX = event.getRawX();
         float screenY = event.getRawY();
-        float viewX = screenX - location[0];
-        float viewY = screenY - location[1];
+        float viewX = screenX - location[0] - v.getWidth()/2;
+        float viewY = screenY - location[1] - v.getHeight()/2;
         return new Point((int) viewX, (int) viewY);
     }
 
@@ -128,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             float y = event.values[1];
             float z = event.values[2];
             String result = x + "," + y + "," + z + "\n";
-            Log.d(TAG, "Sensor " + event.sensor.getType() + ": " + result);
+            //Log.d(TAG, "Sensor " + event.sensor.getType() + ": " + result);
             targetList.add(result);
         }
     }
@@ -140,11 +144,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_UP && started) {
-            Point p = getRelativePosition(targetView, event);
+        Log.d(TAG, "onTouch: " + event.getAction());
+        if (event.getAction() == MotionEvent.ACTION_DOWN && started) {
+            Point p = getRelativePosition(boundView, event);
             String result = p.x + "," + p.y + "\n";
             Log.d(TAG, "onTouch: " + result);
             positionValues.add(result);
+            Log.d(TAG, "totalPos: " + positionValues.size());
         }
         return false;
     }
