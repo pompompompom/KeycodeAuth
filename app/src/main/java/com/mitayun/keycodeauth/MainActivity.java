@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
+import android.content.pm.ActivityInfo;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -57,6 +58,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         gyro = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
     public void startRecording(View view) {
@@ -131,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             float x = event.values[0];
             float y = event.values[1];
             float z = event.values[2];
-            String result = x + "," + y + "," + z + "\n";
+            String result = event.timestamp / 1000000 + "," + x + "," + y + "," + z + "\n";
             //Log.d(TAG, "Sensor " + event.sensor.getType() + ": " + result);
             targetList.add(result);
         }
@@ -147,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         Log.d(TAG, "onTouch: " + event.getAction());
         if (event.getAction() == MotionEvent.ACTION_DOWN && started) {
             Point p = getRelativePosition(boundView, event);
-            String result = p.x + "," + p.y + "\n";
+            String result = event.getEventTime() + "," + p.x + "," + p.y + "\n";
             Log.d(TAG, "onTouch: " + result);
             positionValues.add(result);
             Log.d(TAG, "totalPos: " + positionValues.size());
