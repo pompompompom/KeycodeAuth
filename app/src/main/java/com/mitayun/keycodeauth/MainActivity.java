@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ToggleButton;
 import android.content.pm.ActivityInfo;
 
 import java.io.File;
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static final String POSTFIX_ACC = "_acc";
     private static final String POSTFIX_GYRO = "_gyro";
     private static final String POSTFIX_POS = "_pos";
+    private static final String POSTFIX_ALL = "_all";
 
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -39,10 +41,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private List<String> accValues = new ArrayList<>();
     private List<String> gyroValues = new ArrayList<>();
     private List<String> positionValues = new ArrayList<>();
+    private List<String> allValues = new ArrayList<>();
 
     private EditText fileNameEditText;
+    private ToggleButton isRightToggleButton;
+    private ToggleButton isTableToggleButton;
+    private ToggleButton isThumbToggleButton;
+    private ToggleButton isNailToggleButton;
     private View targetView;
     private View boundView;
+
+    private int count = 0;
+    private String previousFileName = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +60,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
 
         fileNameEditText = (EditText) findViewById(R.id.filename);
+        isRightToggleButton = (ToggleButton) findViewById(R.id.isRightHand);
+        isTableToggleButton = (ToggleButton) findViewById(R.id.isTable);
+        isThumbToggleButton = (ToggleButton) findViewById(R.id.isThumb);
+        isNailToggleButton = (ToggleButton) findViewById(R.id.isThumb);
         targetView = findViewById(R.id.targetView);
         boundView = findViewById(R.id.boundView);
         boundView.setOnTouchListener(this);
@@ -77,18 +91,33 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         started = false;
 
         // write arraylist to file
-        String fileName = fileNameEditText.getText().toString();
+        String fileName = fileNameEditText.getText().toString() + "_" +
+                (isRightToggleButton.isChecked() ? "r" : "l") +
+                (isTableToggleButton.isChecked() ? "d" : "h") +
+                (isNailToggleButton.isChecked() ? "n" : "f") +
+                (isThumbToggleButton.isChecked() ? "t" : "i");
+
+
+        if (fileName.equals(previousFileName)) {
+            count++;
+        } else {
+            previousFileName = fileName;
+        }
+        fileName = fileName + count;
+
         writeToFile(fileName + POSTFIX_ACC, accValues);
         writeToFile(fileName + POSTFIX_GYRO, gyroValues);
         writeToFile(fileName + POSTFIX_POS, positionValues);
+        writeToFile(fileName + POSTFIX_ALL, allValues);
 
         // clear arraylist
         accValues.clear();
         gyroValues.clear();
         positionValues.clear();
+        allValues.clear();
 
         // clear filename edittext
-        fileNameEditText.setText("");
+//        fileNameEditText.setText("");
     }
 
     private void writeToFile(String fileName, List<String> listToWrite) {
@@ -122,21 +151,25 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onSensorChanged(SensorEvent event) {
         List<String> targetList = null;
+        String typeString = "";
         switch (event.sensor.getType()) {
             case Sensor.TYPE_ACCELEROMETER:
                 targetList = accValues;
+                typeString = "acc";
                 break;
             case Sensor.TYPE_GYROSCOPE:
                 targetList = gyroValues;
+                typeString = "gyro";
                 break;
         }
         if (targetList != null) {
             float x = event.values[0];
             float y = event.values[1];
             float z = event.values[2];
-            String result = event.timestamp / 1000000 + "," + x + "," + y + "," + z + "\n";
+            String result = typeString + "," + event.timestamp / 1000000 + "," + x + "," + y + "," + z + "\n";
             //Log.d(TAG, "Sensor " + event.sensor.getType() + ": " + result);
             targetList.add(result);
+            allValues.add(result);
         }
     }
 
@@ -150,9 +183,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         Log.d(TAG, "onTouch: " + event.getAction());
         if (event.getAction() == MotionEvent.ACTION_DOWN && started) {
             Point p = getRelativePosition(boundView, event);
-            String result = event.getEventTime() + "," + p.x + "," + p.y + "\n";
+            String result = "pos," + event.getEventTime() + "," + p.x + "," + p.y + "\n";
             Log.d(TAG, "onTouch: " + result);
             positionValues.add(result);
+            allValues.add(result);
             Log.d(TAG, "totalPos: " + positionValues.size());
         }
         return false;

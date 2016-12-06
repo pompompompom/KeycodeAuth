@@ -14,7 +14,9 @@
     <EditText
         android:id="@+id/filename"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:hint="Subject name" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -49,4 +51,47 @@
             android:layout_height="20dp"
             android:background="#FF0000" />
     </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ToggleButton
+            android:text="right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/isRightHand"
+            android:checked="true"
+            android:textOn="right"
+            android:textOff="left" />
+
+        <ToggleButton
+            android:text="table"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/isTable"
+            android:textOff="holding"
+            android:textOn="table"
+            android:checked="true" />
+
+        <ToggleButton
+            android:text="thumb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/isThumb"
+            android:textOn="thumb"
+            android:textOff="index"
+            android:checked="true" />
+
+        <ToggleButton
+            android:text="nail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/isNail"
+            android:checked="true"
+            android:textOn="nail"
+            android:textOff="no nail" />
+    </LinearLayout>
+
 </LinearLayout>
